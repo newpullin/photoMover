@@ -83,7 +83,11 @@ def set_folder(changed_path, refresh=False):
             now_process = 1
             nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: ")
             now_file = files[0]
-            photo = ImageTk.PhotoImage(Image.open(target_folder.get() + "/" + now_file).resize((670, 480)))
+            image = Image.open(target_folder.get() + "/" + now_file)
+
+            new_width = int(image.width*image.height/480) if image.height < 480 else int(image.width*480/image.height)
+
+            photo = ImageTk.PhotoImage(image.resize((new_width, 480)))
             photo_label.configure(image=photo)
             photo_label.image = photo
 
