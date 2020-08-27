@@ -1,5 +1,5 @@
 # PhotoMover
-  <img src ="https://img.shields.io/github/last-commit/newpullin/photoMover" /> <img src="https://img.shields.io/github/license/newpullin/photoMover" />
+  <img src ="https://img.shields.io/github/last-commit/newpullin/photoMover" /> <img src="https://img.shields.io/github/license/newpullin/photoMover?style=flat-square" />
 
 * more precisely it should called Photo classifier
 * using python and tkinter library 
