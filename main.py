@@ -1,3 +1,4 @@
+import shutil
 from tkinter import *
 from PIL import Image, ImageTk
 import os
@@ -12,6 +13,17 @@ save_folder = StringVar()
 moveChkVar = IntVar()
 shortcutName = StringVar()
 shortcutKey = StringVar()
+nowStatus = StringVar()
+skipNum = StringVar()
+
+#now_process는 인덱스 보다 1 증가된 값
+now_process = 0
+total_process = 0
+prev_result = ""
+files = None
+
+
+shortcut_dict = {}
 
 root.geometry("840x1000")
 
@@ -28,28 +40,60 @@ photo_label.pack()
 moveChkBox = Checkbutton(left_frame, text="원본을 이동 시킬까요?", variable=moveChkVar)
 moveChkBox.deselect()
 moveChkBox.pack()
-
+print(moveChkVar.get())
 #폴더 설정
 folderSetFrame = LabelFrame(left_frame, text="폴더 설정", pady=10)
 folderSetFrame.pack()
+
+processFrame = LabelFrame(left_frame, text="진행상태", pady=10)
+processFrame.pack()
+nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: {prev_result}")
+
+def skip():
+    global now_process
+    global skipNum
+    global nowStatus
+    global prev_result
+    global total_process
+
+    now_process = int(skipNum.get())
+    nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: {prev_result}")
+
+
+Label(processFrame, textvariable=nowStatus).grid(row=0, column=0)
+Entry(processFrame, textvariable=skipNum, width=5).grid(row=1, column=0)
+Button(processFrame, text="스킵", command=skip).grid(row=1, column=1)
 
 target_folder.set('대상폴더: c:/')
 save_folder.set('저장폴더: c:/')
 
 
-def set_folder(changed_path, add_text=""):
-    folder_path = filedialog.askdirectory(title="목표 폴더를 정하십시오")
+def set_folder(changed_path, refresh=False):
+    global files
+    global total_process
+    global now_process
+    folder_path = filedialog.askdirectory(title="폴더를 정하십시오")
     if not os.path.isdir(folder_path):
         changed_path.set('c:/')
     else:
-        changed_path.set(add_text + folder_path)
+        changed_path.set(folder_path)
+        if refresh:
+            files = os.listdir(folder_path)
+            total_process = len(files)
+            now_process = 1
+            nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: ")
+            now_file = files[0]
+            photo = ImageTk.PhotoImage(Image.open(target_folder.get() + "/" + now_file).resize((670, 480)))
+            photo_label.configure(image=photo)
+            photo_label.image = photo
 
 
-
-Label(folderSetFrame, textvariable=target_folder).grid(row=0, column=0, padx=10)
-Button(folderSetFrame, text="변경", command=lambda: set_folder(target_folder,"대상폴더: ")).grid(row=0, column=1, padx=10)
-Label(folderSetFrame, textvariable=save_folder).grid(row=1, column=0, padx=10)
-Button(folderSetFrame, text="변경", command=lambda: set_folder(save_folder,"저장폴더: ")).grid(row=1, column=1, padx=10)
+Label(folderSetFrame, text="목표폴더 :").grid(row=0, column=0, padx=10)
+Label(folderSetFrame, textvariable=target_folder).grid(row=0, column=1, padx=10)
+Button(folderSetFrame, text="변경", command=lambda: set_folder(target_folder, True)).grid(row=0, column=2, padx=10)
+Label(folderSetFrame, text="저장폴더 :").grid(row=1, column=0, padx=10)
+Label(folderSetFrame, textvariable=save_folder).grid(row=1, column=1, padx=10)
+Button(folderSetFrame, text="변경", command=lambda: set_folder(save_folder)).grid(row=1, column=2, padx=10)
 
 
 # 우측 리스트 관리
@@ -64,6 +108,7 @@ def addShortCut():
         return False
 
     list_file.insert(END, name + " : " + key)
+    shortcut_dict[key] = name
 
 
 
@@ -82,4 +127,39 @@ list_file.grid(row=1, column=0)
 Button(list_frame, text="삭제").grid(row=2, column=0)
 Button(list_frame, text="옵션저장").grid(row=3, column=0)
 Button(list_frame, text="옵션가져오기").grid(row=4, column=0)
+
+def key(event):
+    global prev_result
+    global now_process
+    global photo_label
+    pushed = event.char
+    if pushed in shortcut_dict.keys():
+        if moveChkVar.get() == 0:
+            folder_path = save_folder.get() + "/" + shortcut_dict[pushed]
+            if not os.path.isdir(folder_path):
+                os.makedirs(folder_path)
+
+            now_file = files[now_process-1]
+            shutil.copy(target_folder.get() + "/" + now_file, folder_path + "/" + now_file)
+            prev_result = shortcut_dict[pushed]
+            if now_process-1 < len(files):
+                now_process += 1
+            now_file = files[now_process - 1]
+            #사진 갱신
+            photo = ImageTk.PhotoImage(Image.open(target_folder.get() + "/" + now_file).resize((670, 480)))
+            photo_label.configure(image=photo)
+            photo_label.image = photo
+            nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: {prev_result}")
+            # copy 하라
+        else :
+            pass
+            #이동시켜라
+        print(shortcut_dict[pushed])
+
+
+event_input = Entry(left_frame)
+event_input.pack()
+event_input.bind("<Key>", key)
+
+
 root.mainloop()
