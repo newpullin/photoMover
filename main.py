@@ -31,8 +31,8 @@ left_frame = Frame(root)
 left_frame.grid(row=0, column=0)
 
 #사진
-photo = ImageTk.PhotoImage(Image.open("./assets/cat.jpg").resize((670, 480)))
-photo_label = Label(left_frame, image=photo)
+#photo = ImageTk.PhotoImage(Image.open("./assets/cat.jpg").resize((670, 480)))
+photo_label = Label(left_frame, text="image")
 photo_label.pack()
 
 #이동결정
