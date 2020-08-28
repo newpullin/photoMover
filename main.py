@@ -167,3 +167,40 @@ event_input.bind("<Key>", key)
 
 
 root.mainloop()
+
+def imageWidthFixedHeight(photo, fixHeight):
+    pass
+
+class PhotoMover:
+    def __init__(self, title="Photo classifier", window_size="840x1000", FIXED_HEIGHT=480):
+        # TK root frame
+        self.root = Tk()
+        self.root.title(title)
+        self.root.geometry(window_size)
+        # CONSTANCE
+        self.FIXED_HEIGHT = FIXED_HEIGHT
+
+        # Tk variable
+        self.target_folder = StringVar()
+        self.save_folder = StringVar()
+        self.moveChkVar = IntVar()
+        self.shortcutName = StringVar()
+        self.shortcutKey = StringVar()
+        self.nowStatus = StringVar()
+        self.skipNum = StringVar()
+
+        # normal variable
+        self.now_process = 0
+        self.total_process = 0
+        self.prev_result = ""
+        self.files = None
+        self.shortcut_dict = {}
+
+        # component of program
+        self.left_frame = Frame(self.root)
+
+    def construct_layout(self):
+        pass
+
+    def start(self):
+        pass
