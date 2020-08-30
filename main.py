@@ -1,4 +1,5 @@
 import shutil
+import time
 from tkinter import *
 from PIL import Image, ImageTk
 import os
@@ -15,6 +16,7 @@ shortcutName = StringVar()
 shortcutKey = StringVar()
 nowStatus = StringVar()
 skipNum = StringVar()
+file_name_string = StringVar()
 
 #now_process는 인덱스 보다 1 증가된 값
 now_process = 0
@@ -34,7 +36,8 @@ left_frame.grid(row=0, column=0)
 #photo = ImageTk.PhotoImage(Image.open("./assets/cat.jpg").resize((670, 480)))
 photo_label = Label(left_frame, text="image")
 photo_label.pack()
-
+file_name_label = Label(left_frame, textvariable=file_name_string)
+file_name_label.pack();
 #이동결정
 
 moveChkBox = Checkbutton(left_frame, text="원본을 이동 시킬까요?", variable=moveChkVar)
@@ -57,6 +60,14 @@ def skip():
     global total_process
 
     now_process = int(skipNum.get())
+    now_file = files[now_process]
+    file_name_string .set(now_file)
+    # 사진 갱신
+    image = Image.open(target_folder.get() + "/" + now_file)
+    new_width = int(image.width * image.height / 480) if image.height < 480 else int(image.width * 480 / image.height)
+    photo = ImageTk.PhotoImage(image.resize((new_width, 480)))
+    photo_label.configure(image=photo)
+    photo_label.image = photo
     nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: {prev_result}")
 
 
@@ -80,9 +91,11 @@ def set_folder(changed_path, refresh=False):
         if refresh:
             files = os.listdir(folder_path)
             total_process = len(files)
-            now_process = 1
-            nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: ")
-            now_file = files[0]
+            now_process = 0
+            nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: {prev_result}")
+            # violate the DRY rules.. I will fix it
+            now_file = files[now_process]
+            file_name_string .set(now_file)
             image = Image.open(target_folder.get() + "/" + now_file)
 
             new_width = int(image.width*image.height/480) if image.height < 480 else int(image.width*480/image.height)
@@ -128,9 +141,29 @@ Button(listAddFrame, text="추가", command=addShortCut).grid(row=1, column=2)
 list_file = Listbox(list_frame, selectmode="extended", height=20)
 list_file.grid(row=1, column=0)
 
+
+
+
+def load_option():
+    file_path = filedialog.askopenfilename(title="옵션을 선택하십시오")
+    read_option(file_path)
+
+
+def read_option(path) :
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f.readlines():
+            if len(line) < 1:
+                continue
+            else:
+                key = line.split(',')[0].strip()
+                value = line.split(',')[1].strip()
+                list_file.insert(END, key + " : " + value)
+                shortcut_dict[value] = key
+
+
 Button(list_frame, text="삭제").grid(row=2, column=0)
 Button(list_frame, text="옵션저장").grid(row=3, column=0)
-Button(list_frame, text="옵션가져오기").grid(row=4, column=0)
+Button(list_frame, text="옵션가져오기", command = load_option).grid(row=4, column=0)
 
 def key(event):
     global prev_result
@@ -143,14 +176,17 @@ def key(event):
             if not os.path.isdir(folder_path):
                 os.makedirs(folder_path)
 
-            now_file = files[now_process-1]
+            now_file = files[now_process]
             shutil.copy(target_folder.get() + "/" + now_file, folder_path + "/" + now_file)
+            time.sleep(0.2)
             prev_result = shortcut_dict[pushed]
-            if now_process-1 < len(files):
-                now_process += 1
-            now_file = files[now_process - 1]
+            now_process += 1
+            now_file = files[now_process]
+            file_name_string .set(now_file)
             #사진 갱신
-            photo = ImageTk.PhotoImage(Image.open(target_folder.get() + "/" + now_file).resize((670, 480)))
+            image = Image.open(target_folder.get() + "/" + now_file)
+            new_width = int(image.width * image.height / 480) if image.height < 480 else int(image.width * 480 / image.height)
+            photo = ImageTk.PhotoImage(image.resize((new_width, 480)))
             photo_label.configure(image=photo)
             photo_label.image = photo
             nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: {prev_result}")
