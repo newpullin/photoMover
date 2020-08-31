@@ -31,7 +31,7 @@ left_frame = Frame(root)
 left_frame.grid(row=0, column=0)
 
 #사진
-photo = ImageTk.PhotoImage(Image.open("./assets/cat.jpg").resize((670, 480)))
+photo = ImageTk.PhotoImage(Image.open("../assets/cat.jpg").resize((670, 480)))
 photo_label = Label(left_frame, image=photo)
 photo_label.pack()
 
@@ -204,3 +204,46 @@ class PhotoMover:
 
     def start(self):
         pass
+
+"""
+left_frame = Frame(root)
+left_frame.grid(row=0, column=0)
+
+#사진
+photo = ImageTk.PhotoImage(Image.open("./assets/cat.jpg").resize((670, 480)))
+photo_label = Label(left_frame, image=photo)
+photo_label.pack()
+
+#이동결정
+
+moveChkBox = Checkbutton(left_frame, text="원본을 이동 시킬까요?", variable=moveChkVar)
+moveChkBox.deselect()
+moveChkBox.pack()
+print(moveChkVar.get())
+#폴더 설정
+folderSetFrame = LabelFrame(left_frame, text="폴더 설정", pady=10)
+folderSetFrame.pack()
+
+processFrame = LabelFrame(left_frame, text="진행상태", pady=10)
+processFrame.pack()
+nowStatus.set(f"현재 {now_process}/{total_process} 이전 결과: {prev_result}")
+
+"""
+class LeftFrame:
+    def __init__(self):
+        self.left_frame = Frame(root)
+        self.left_frame.grid(row=0, column=0)
+
+        self.photo = None
+        self.photo_label = None
+        self.moveChkBox = None
+        folderSetFrame = None
+
+        processFrame = None
+
+
+
+    def construct(self, root):
+        self.left_frame = Frame(root)
+        self.left_frame.grid(row=0, column=0)
+
